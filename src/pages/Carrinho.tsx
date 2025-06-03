@@ -1,13 +1,18 @@
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Minus, Plus, Trash2, ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
 import useStore from "@/store/useStore";
+import PaymentModal from "@/components/PaymentModal";
+import SuccessModal from "@/components/SuccessModal";
 
 const Carrinho = () => {
-  const { cartItems, updateCartQuantity, removeFromCart } = useStore();
+  const { cartItems, updateCartQuantity, removeFromCart, clearCart } = useStore();
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   const updateQuantity = (id: string, newQuantity: number) => {
     if (newQuantity <= 0) {
@@ -21,8 +26,9 @@ const Carrinho = () => {
     return cartItems.reduce((sum, item) => sum + (item.preco * item.quantidade), 0);
   };
 
-  const handleCheckout = () => {
-    alert("Redirecionando para o pagamento...");
+  const handlePaymentSuccess = () => {
+    clearCart();
+    setShowSuccessModal(true);
   };
 
   return (
@@ -130,7 +136,7 @@ const Carrinho = () => {
                   <Button 
                     className="w-full" 
                     size="lg"
-                    onClick={handleCheckout}
+                    onClick={() => setShowPaymentModal(true)}
                   >
                     Finalizar Compra
                   </Button>
@@ -140,6 +146,18 @@ const Carrinho = () => {
           </div>
         )}
       </main>
+
+      <PaymentModal
+        isOpen={showPaymentModal}
+        onClose={() => setShowPaymentModal(false)}
+        total={getTotal()}
+        onPaymentSuccess={handlePaymentSuccess}
+      />
+
+      <SuccessModal
+        isOpen={showSuccessModal}
+        onClose={() => setShowSuccessModal(false)}
+      />
     </div>
   );
 };
