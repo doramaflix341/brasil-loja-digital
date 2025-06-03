@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Plus, Edit, Trash2, LogOut, Users, Package, RefreshCw } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import useStore from "@/store/useStore";
 
 interface Product {
   id: string;
@@ -31,8 +31,8 @@ interface RefundRequest {
 const Admin = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { products, addProduct, updateProduct, deleteProduct } = useStore();
   const [activeTab, setActiveTab] = useState("produtos");
-  const [products, setProducts] = useState<Product[]>([]);
   const [refundRequests, setRefundRequests] = useState<RefundRequest[]>([]);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [newAdmin, setNewAdmin] = useState({ email: "", nome: "" });
@@ -50,26 +50,7 @@ const Admin = () => {
       return;
     }
 
-    // Dados de exemplo
-    setProducts([
-      {
-        id: "1",
-        nome: "Smartphone Pro",
-        descricao: "Smartphone de última geração com câmera de 108MP",
-        preco: 2599.99,
-        imagem_url: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400",
-        ativo: true
-      },
-      {
-        id: "2",
-        nome: "Notebook Gamer",
-        descricao: "Notebook para jogos com placa de vídeo dedicada",
-        preco: 4999.99,
-        imagem_url: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=400",
-        ativo: true
-      }
-    ]);
-
+    // Dados de exemplo para reembolsos
     setRefundRequests([
       {
         id: "1",
@@ -99,13 +80,13 @@ const Admin = () => {
         ...editingProduct,
         id: Math.random().toString(36).substr(2, 9)
       };
-      setProducts(prev => [...prev, newProduct]);
+      addProduct(newProduct);
       toast({
         title: "Produto criado",
         description: "O produto foi adicionado com sucesso",
       });
     } else {
-      setProducts(prev => prev.map(p => p.id === editingProduct.id ? editingProduct : p));
+      updateProduct(editingProduct);
       toast({
         title: "Produto atualizado",
         description: "As alterações foram salvas com sucesso",
@@ -115,7 +96,7 @@ const Admin = () => {
   };
 
   const handleDeleteProduct = (id: string) => {
-    setProducts(prev => prev.filter(p => p.id !== id));
+    deleteProduct(id);
     toast({
       title: "Produto removido",
       description: "O produto foi excluído com sucesso",
@@ -150,11 +131,11 @@ const Admin = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow-sm border-b">
+    <div className="min-h-screen bg-background text-foreground">
+      <header className="bg-card shadow-sm border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <h1 className="text-2xl font-bold text-gray-900">Painel Administrativo</h1>
+            <h1 className="text-2xl font-bold">Mercantil 7 - Admin</h1>
             <Button variant="outline" onClick={handleLogout}>
               <LogOut className="h-4 w-4 mr-2" />
               Logout
@@ -276,8 +257,8 @@ const Admin = () => {
                       className="w-full h-32 object-cover rounded mb-2"
                     />
                     <h3 className="font-semibold">{product.nome}</h3>
-                    <p className="text-sm text-gray-600 mb-2">{product.descricao}</p>
-                    <p className="font-bold text-green-600">
+                    <p className="text-sm text-muted-foreground mb-2">{product.descricao}</p>
+                    <p className="font-bold text-green-400">
                       R$ {product.preco.toFixed(2).replace('.', ',')}
                     </p>
                     <div className="flex items-center justify-between mt-3">
@@ -331,7 +312,7 @@ const Admin = () => {
                     type="email"
                     value={newAdmin.email}
                     onChange={(e) => setNewAdmin({...newAdmin, email: e.target.value})}
-                    placeholder="email@techstore.com"
+                    placeholder="email@mercantil7.com"
                   />
                 </div>
                 <Button onClick={handleCreateAdmin}>
@@ -353,8 +334,8 @@ const Admin = () => {
                     <div className="flex justify-between items-start">
                       <div>
                         <h3 className="font-semibold">Pedido #{request.pedidoId}</h3>
-                        <p className="text-sm text-gray-600">Cliente: {request.clienteEmail}</p>
-                        <p className="text-sm text-gray-600">Data: {request.data}</p>
+                        <p className="text-sm text-muted-foreground">Cliente: {request.clienteEmail}</p>
+                        <p className="text-sm text-muted-foreground">Data: {request.data}</p>
                         <p className="mt-2"><strong>Motivo:</strong> {request.motivo}</p>
                       </div>
                       <div className="flex flex-col items-end space-y-2">

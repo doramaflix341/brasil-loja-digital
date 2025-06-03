@@ -1,60 +1,20 @@
 
-import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Minus, Plus, Trash2, ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
-
-interface Product {
-  id: string;
-  nome: string;
-  preco: number;
-  imagem_url: string;
-}
-
-interface CartItem extends Product {
-  quantidade: number;
-}
+import useStore from "@/store/useStore";
 
 const Carrinho = () => {
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
-
-  useEffect(() => {
-    // Simulação de itens no carrinho
-    const sampleCartItems: CartItem[] = [
-      {
-        id: "1",
-        nome: "Smartphone Pro",
-        preco: 2599.99,
-        imagem_url: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=200",
-        quantidade: 1
-      },
-      {
-        id: "3",
-        nome: "Fone Bluetooth",
-        preco: 299.99,
-        imagem_url: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=200",
-        quantidade: 2
-      }
-    ];
-    setCartItems(sampleCartItems);
-  }, []);
+  const { cartItems, updateCartQuantity, removeFromCart } = useStore();
 
   const updateQuantity = (id: string, newQuantity: number) => {
     if (newQuantity <= 0) {
-      removeItem(id);
+      removeFromCart(id);
       return;
     }
-    setCartItems(prev => 
-      prev.map(item => 
-        item.id === id ? { ...item, quantidade: newQuantity } : item
-      )
-    );
-  };
-
-  const removeItem = (id: string) => {
-    setCartItems(prev => prev.filter(item => item.id !== id));
+    updateCartQuantity(id, newQuantity);
   };
 
   const getTotal = () => {
@@ -62,13 +22,12 @@ const Carrinho = () => {
   };
 
   const handleCheckout = () => {
-    // Aqui você redirecionaria para o gateway de pagamento
     alert("Redirecionando para o pagamento...");
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow-sm border-b">
+    <div className="min-h-screen bg-background text-foreground">
+      <header className="bg-card shadow-sm border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center h-16">
             <Link to="/" className="mr-4">
@@ -77,7 +36,7 @@ const Carrinho = () => {
                 Voltar
               </Button>
             </Link>
-            <h1 className="text-2xl font-bold text-gray-900">Carrinho de Compras</h1>
+            <h1 className="text-2xl font-bold">Carrinho de Compras</h1>
           </div>
         </div>
       </header>
@@ -87,7 +46,7 @@ const Carrinho = () => {
           <Card className="text-center py-12">
             <CardContent>
               <h2 className="text-xl font-semibold mb-4">Seu carrinho está vazio</h2>
-              <p className="text-gray-600 mb-6">Adicione alguns produtos para continuar</p>
+              <p className="text-muted-foreground mb-6">Adicione alguns produtos para continuar</p>
               <Link to="/">
                 <Button>Continuar Comprando</Button>
               </Link>
@@ -107,7 +66,7 @@ const Carrinho = () => {
                       />
                       <div className="flex-1">
                         <h3 className="font-semibold text-lg">{item.nome}</h3>
-                        <p className="text-green-600 font-bold">
+                        <p className="text-green-400 font-bold">
                           R$ {item.preco.toFixed(2).replace('.', ',')}
                         </p>
                       </div>
@@ -136,7 +95,7 @@ const Carrinho = () => {
                         <Button
                           size="sm"
                           variant="destructive"
-                          onClick={() => removeItem(item.id)}
+                          onClick={() => removeFromCart(item.id)}
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
@@ -164,7 +123,7 @@ const Carrinho = () => {
                   <hr />
                   <div className="flex justify-between font-bold text-lg">
                     <span>Total:</span>
-                    <span className="text-green-600">
+                    <span className="text-green-400">
                       R$ {getTotal().toFixed(2).replace('.', ',')}
                     </span>
                   </div>
