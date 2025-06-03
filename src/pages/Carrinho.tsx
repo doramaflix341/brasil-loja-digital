@@ -30,7 +30,7 @@ const Carrinho = () => {
       <header className="bg-card shadow-sm border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center h-16">
-            <Link to="/" className="mr-4">
+            <Link to="/loja" className="mr-4">
               <Button variant="ghost" size="sm">
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Voltar
@@ -47,7 +47,7 @@ const Carrinho = () => {
             <CardContent>
               <h2 className="text-xl font-semibold mb-4">Seu carrinho está vazio</h2>
               <p className="text-muted-foreground mb-6">Adicione alguns produtos para continuar</p>
-              <Link to="/">
+              <Link to="/loja">
                 <Button>Continuar Comprando</Button>
               </Link>
             </CardContent>
