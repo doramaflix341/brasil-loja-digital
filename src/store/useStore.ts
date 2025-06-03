@@ -36,7 +36,7 @@ const useStore = create<Store>()(
   persist(
     (set, get) => ({
       products: [],
-      cartItems: [],
+      cartItems: [], // Carrinho sempre vazio inicialmente
       
       addProduct: (product) =>
         set((state) => ({
@@ -98,6 +98,7 @@ const useStore = create<Store>()(
       
       initializeProducts: () => {
         const currentProducts = get().products;
+        // Só adiciona produtos de exemplo se não houver nenhum produto no store
         if (currentProducts.length === 0) {
           const sampleProducts: Product[] = [
             {
@@ -131,6 +132,10 @@ const useStore = create<Store>()(
     }),
     {
       name: 'mercantil-storage',
+      partialize: (state) => ({
+        products: state.products,
+        // Não persistir o carrinho - sempre começar vazio
+      }),
     }
   )
 );

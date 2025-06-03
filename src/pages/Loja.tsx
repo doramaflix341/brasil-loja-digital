@@ -12,6 +12,7 @@ const Loja = () => {
   const { toast } = useToast();
 
   useEffect(() => {
+    // Sempre inicializar produtos ao carregar a loja
     initializeProducts();
   }, [initializeProducts]);
 
