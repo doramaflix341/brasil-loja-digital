@@ -39,7 +39,7 @@ const PaymentModal = ({ isOpen, onClose, total, onPaymentSuccess }: PaymentModal
         body: {
           email,
           amount: total,
-          description: "Compra de produtos - Loja Digital"
+          description: "Compra de produtos - Mercantil 7"
         }
       });
 
@@ -50,9 +50,8 @@ const PaymentModal = ({ isOpen, onClose, total, onPaymentSuccess }: PaymentModal
       console.log('Resposta da API:', data);
       setQrCodeData(data);
       
-      // A resposta da Cashtime deve conter o código PIX em data.payment.pix_code ou similar
-      // Vamos adaptar conforme a estrutura real da resposta
-      const pixCode = data.payment?.pix_code || data.qr_code || data.pix_key || '';
+      // A resposta da Cashtime pode vir em diferentes formatos
+      const pixCode = data.qr_code || data.pix_code || data.payment?.pix_code || data.pix_key || '';
       
       if (pixCode) {
         // Gerar QR Code visual
@@ -60,9 +59,9 @@ const PaymentModal = ({ isOpen, onClose, total, onPaymentSuccess }: PaymentModal
         setQrCodeImage(qrImage);
         
         // Iniciar verificação de pagamento se houver ID da transação
-        if (data.id || data.transaction_id) {
+        if (data.id || data.transaction_id || data.charge_id) {
           setCheckingPayment(true);
-          startPaymentPolling(data.id || data.transaction_id);
+          startPaymentPolling(data.id || data.transaction_id || data.charge_id);
         }
 
         toast({
@@ -126,6 +125,14 @@ const PaymentModal = ({ isOpen, onClose, total, onPaymentSuccess }: PaymentModal
     }
   }, [isOpen]);
 
+  const getPixCodeDisplay = () => {
+    return qrCodeData?.qr_code || 
+           qrCodeData?.pix_code || 
+           qrCodeData?.payment?.pix_code || 
+           qrCodeData?.pix_key || 
+           'Código não disponível';
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
@@ -175,7 +182,7 @@ const PaymentModal = ({ isOpen, onClose, total, onPaymentSuccess }: PaymentModal
             <div className="p-4 bg-muted rounded">
               <p className="text-sm text-muted-foreground mb-2">Ou copie o código PIX:</p>
               <p className="text-xs break-all font-mono bg-background p-2 rounded">
-                {qrCodeData.payment?.pix_code || qrCodeData.qr_code || qrCodeData.pix_key || 'Código não disponível'}
+                {getPixCodeDisplay()}
               </p>
             </div>
 
