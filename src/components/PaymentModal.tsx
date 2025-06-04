@@ -39,7 +39,7 @@ const PaymentModal = ({ isOpen, onClose, total, onPaymentSuccess }: PaymentModal
         body: {
           email,
           amount: total,
-          description: "Pedido via Mercantil 7"
+          description: "Compra de produtos - Loja Digital"
         }
       });
 
@@ -47,25 +47,36 @@ const PaymentModal = ({ isOpen, onClose, total, onPaymentSuccess }: PaymentModal
         throw error;
       }
 
+      console.log('Resposta da API:', data);
       setQrCodeData(data);
       
-      // Gerar QR Code visual
-      const qrImage = await QRCode.toDataURL(data.qr_code);
-      setQrCodeImage(qrImage);
+      // A resposta da Cashtime deve conter o código PIX em data.payment.pix_code ou similar
+      // Vamos adaptar conforme a estrutura real da resposta
+      const pixCode = data.payment?.pix_code || data.qr_code || data.pix_key || '';
       
-      // Iniciar verificação de pagamento
-      setCheckingPayment(true);
-      startPaymentPolling(data.id);
+      if (pixCode) {
+        // Gerar QR Code visual
+        const qrImage = await QRCode.toDataURL(pixCode);
+        setQrCodeImage(qrImage);
+        
+        // Iniciar verificação de pagamento se houver ID da transação
+        if (data.id || data.transaction_id) {
+          setCheckingPayment(true);
+          startPaymentPolling(data.id || data.transaction_id);
+        }
 
-      toast({
-        title: "PIX gerado!",
-        description: "Escaneie o QR Code para pagar"
-      });
+        toast({
+          title: "PIX gerado!",
+          description: "Escaneie o QR Code para pagar"
+        });
+      } else {
+        throw new Error('Código PIX não encontrado na resposta');
+      }
     } catch (error) {
       console.error('Erro ao gerar PIX:', error);
       toast({
         title: "Erro",
-        description: "Erro ao gerar cobrança PIX. Tente novamente.",
+        description: "Erro ao gerar cobrança. Tente novamente.",
         variant: "destructive"
       });
     } finally {
@@ -164,7 +175,7 @@ const PaymentModal = ({ isOpen, onClose, total, onPaymentSuccess }: PaymentModal
             <div className="p-4 bg-muted rounded">
               <p className="text-sm text-muted-foreground mb-2">Ou copie o código PIX:</p>
               <p className="text-xs break-all font-mono bg-background p-2 rounded">
-                {qrCodeData.qr_code}
+                {qrCodeData.payment?.pix_code || qrCodeData.qr_code || qrCodeData.pix_key || 'Código não disponível'}
               </p>
             </div>
 

@@ -24,16 +24,26 @@ serve(async (req) => {
       )
     }
 
-    const response = await fetch('https://staging.api.cashtime.com.br/pix/charge', {
+    // Converter valor para centavos (R$ 64,00 = 6400)
+    const valueInCents = Math.round(amount * 100)
+
+    const response = await fetch('https://staging.api.cashtime.com.br/transaction', {
       method: 'POST',
       headers: {
         'Authorization': 'Bearer sk_live_16s79VVMskXKR5aNo/bkmwrYKil06vGzk5ikRxuMUiL3c61oNrDkUTBM+czH+sRSqd7QpPJ/AA5ujs/P+pHQ4cE2YfemAW4E/Ug4U2nZ8+rvRNzqObMgnohELrFCL9FXYJUuURnJHwoP08LitWNlcwcJrZaXN+6g8uxBKp4CmvE=',
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        email,
-        amount,
-        description: description || 'Pedido via Mercantil 7'
+        customer: {
+          email: email
+        },
+        payment: {
+          method: "pix",
+          value: valueInCents
+        },
+        metadata: {
+          description: description || "Compra de produtos - Loja Digital"
+        }
       })
     })
 
@@ -49,6 +59,8 @@ serve(async (req) => {
         }
       )
     }
+
+    console.log('Resposta da API Cashtime:', data)
 
     return new Response(
       JSON.stringify(data),
